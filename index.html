@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Filtro RC</title>
+
+  <style>
+    body {
+      background-image: url(https://picsum.photos/1920/1080);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+
+      background-color: #3d3c40;
+      padding: 20px;
+      border-radius: 10px;
+      color: #000;
+      width: 100%;
+      max-width: 400px;
+      border: 3px solid #000
+    }
+
+    h2,
+    p {
+      text-align: center;
+      color: #f6f2f2;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    /* 🔥 ALINHAMENTO PADRÃO */
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      margin-bottom: 12px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 80%;
+      padding: 15px;
+      background-color: #3a1d75;
+      color: white;
+      /*border: none;*/
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 40px;
+      margin-top: auto;
+      font-size: 20px;
+    }
+
+    button:hover {
+      background-color: #06bf10;
+    }
+    .calcular{
+      border: #000;
+     
+    }
+
+    #resultado {
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      background: #1f1e24;
+      border-radius: 8px;
+      color: #fffdfd;
+      border: 3px solid #080808
+    }
+
+    td,
+    th {
+      padding: 10px;
+    }
+
+    th {
+      background: #277202;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h2>Calculadora Filtro RC</h2>
+    <p>Digite 2 valores</p>
+
+    <label>Tipo de Filtro:</label>
+    <select id="tipo">
+      <option value="low">Passa-baixa</option>
+      <option value="high">Passa-alta</option>
+    </select>
+
+    <label>Calcular:</label>
+    <select id="modo">
+      <option value="fc">Frequência (Fc)</option>
+      <option value="c">Capacitor (C)</option>
+      <option value="r">Resistor (R)</option>
+    </select>
+
+
+    <label>Resistor:</label>
+
+    <input type="text" id="resistor" placeholder="Ex: 10k ou 4k7">
+
+    <label>Capacitor:</label>
+    <input type="text" id="capacitor" placeholder="Ex: 100n, 10u, 47p">
+
+    <label>Frequência:</label>
+    <input type="text" id="frequencia" placeholder="Ex: 1kHz">
+
+    <button onclick="calcular()">Calcular</button>
+
+    <div id="resultado"></div>
+
+  </div>
+
+  <script>
+
+    // 🔥 PARSER
+    function parseValor(str) {
+      if (!str) return NaN;
+
+      str = str.toLowerCase().replace(",", ".").replace(" ", "");
+
+      let match = str.match(/^(\d+)([kmunp])(\d+)$/);
+      if (match) {
+        let base = parseFloat(match[1] + "." + match[3]);
+        return aplicarMultiplicador(base, match[2]);
+      }
+
+      let valor = parseFloat(str);
+      if (isNaN(valor)) return NaN;
+
+      // frequência primeiro
+      if (str.includes("mhz")) return valor * 1e6;
+      if (str.includes("khz")) return valor * 1e3;
+      if (str.includes("hz")) return valor;
+
+      // resistor
+      if (str.includes("k")) return valor * 1e3;
+      if (str.includes("meg")) return valor * 1e6;
+
+      // capacitor
+      if (str.includes("u")) return valor * 1e-6;
+      if (str.includes("n")) return valor * 1e-9;
+      if (str.includes("p")) return valor * 1e-12;
+
+      return valor;
+    }
+
+
+    function aplicarMultiplicador(v, t) {
+      if (t === "k") return v * 1e3;
+      if (t === "m") return v * 1e6;
+      if (t === "u") return v * 1e-6;
+      if (t === "n") return v * 1e-9;
+      if (t === "p") return v * 1e-12;
+      return v;
+    }
+
+    // 🔧 FORMATOS (1 CASA DECIMAL)
+    function formatResistor(v) {
+      if (!v) return "-";
+      if (v >= 1e6) return (v / 1e6).toFixed(1) + " MΩ";
+      if (v >= 1e3) return (v / 1e3).toFixed(0) + " kΩ";
+      return v.toFixed(1) + " Ω";
+    }
+
+    function formatCapacitor(v) {
+      if (!v) return "-";
+      if (v >= 1e-6) return (v / 1e-6).toFixed(0) + " µF";
+      if (v >= 1e-9) return (v / 1e-9).toFixed(0) + " nF";
+      if (v >= 1e-12) return (v / 1e-12).toFixed(0) + " pF";
+      return v.toExponential(1) + " F";
+    }
+
+    function formatFreq(v) {
+      if (!v) return "-";
+      if (v >= 1e6) return (v / 1e6).toFixed(1) + " MHz";
+      if (v >= 1e3) return (v / 1e3).toFixed(1) + " kHz";
+      return v.toFixed(1) + " Hz";
+    }
+
+    // ⚡ CÁLCULO
+    function calcular() {
+
+      let R = parseValor(document.getElementById("resistor").value);
+      let C = parseValor(document.getElementById("capacitor").value);
+      let fc = parseValor(document.getElementById("frequencia").value);
+
+      let modo = document.getElementById("modo").value;
+      let tipo = document.getElementById("tipo").value;
+      let resultado = document.getElementById("resultado");
+
+      let preenchidos = [!isNaN(R), !isNaN(C), !isNaN(fc)].filter(Boolean).length;
+
+      if (preenchidos < 2) {
+        resultado.innerHTML = "<b style='color:red'>Preencha pelo menos 2 valores!</b>";
+        return;
+      }
+
+      if (modo === "fc") fc = 1 / (2 * Math.PI * R * C);
+      if (modo === "c") C = 1 / (2 * Math.PI * R * fc);
+      if (modo === "r") R = 1 / (2 * Math.PI * C * fc);
+
+      resultado.innerHTML = `
+    <table>
+        <tr><th>Parâmetro</th><th>Valor</th></tr>
+        <tr><td>Frequência</td><td>${formatFreq(fc)}</td></tr>
+        <tr><td>Resistor</td><td>${formatResistor(R)}</td></tr>
+        <tr><td>Capacitor</td><td>${formatCapacitor(C)}</td></tr>
+        <tr><td colspan="2">Filtro: ${tipo === "low" ? "Passa-baixa" : "Passa-alta"}</td></tr>
+        <tr><td colspan="2">Desenvolvido por: Ruberlandio Oliveira</td></tr>
+    </table>
+    `;
+    }
+  </script>
+
+</body>
+
+</html>
