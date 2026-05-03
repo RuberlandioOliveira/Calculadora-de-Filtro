@@ -23,7 +23,7 @@
 
     .container {
 
-      background-color: #3d3c40;
+      background-color: #241554;
       padding: 20px;
       border-radius: 10px;
       color: #000;
@@ -61,7 +61,7 @@
     button {
       width: 80%;
       padding: 15px;
-      background-color: #3a1d75;
+      background-color: #320fdf;
       color: white;
       /*border: none;*/
       border-radius: 8px;
@@ -188,15 +188,15 @@
     function formatResistor(v) {
       if (!v) return "-";
       if (v >= 1e6) return (v / 1e6).toFixed(1) + " MΩ";
-      if (v >= 1e3) return (v / 1e3).toFixed(0) + " kΩ";
+      if (v >= 1e3) return (v / 1e3).toFixed(1) + " kΩ";
       return v.toFixed(1) + " Ω";
     }
 
     function formatCapacitor(v) {
       if (!v) return "-";
-      if (v >= 1e-6) return (v / 1e-6).toFixed(0) + " µF";
-      if (v >= 1e-9) return (v / 1e-9).toFixed(0) + " nF";
-      if (v >= 1e-12) return (v / 1e-12).toFixed(0) + " pF";
+      if (v >= 1e-6) return (v / 1e-6).toFixed(1) + " µF";
+      if (v >= 1e-9) return (v / 1e-9).toFixed(1) + " nF";
+      if (v >= 1e-12) return (v / 1e-12).toFixed(1) + " pF";
       return v.toExponential(1) + " F";
     }
 
